@@ -1,6 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  # название приложения
   name: kuber
   # You'll usually want to add your resources to the argocd namespace.
   namespace: argocd
@@ -9,13 +10,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   # The project the application belongs to.
+  # то же название проекта, что в dev.yaml
   project: development
 
   # Source of the application manifests
+  # репозиторий, из которого ArgoCD будет брать код
   source:
-    repoURL: https://github.com/bakavets/k8s-lessons.git  # Can point to either a Helm chart repo or a git repo.
+    repoURL: https://github.com/vladjong/argo_test.git  # Can point to either a Helm chart repo or a git repo.
     targetRevision: master  # For Helm, this refers to the chart version.
-    path: lesson-30/dev/kuber  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
+    # путь до приложения Kubernetes, деплой которого также описан
+    path: dev/kuber  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
 
   # Destination cluster and namespace to deploy the application
   destination:
@@ -23,9 +27,13 @@ spec:
     namespace: kuber
 
   # Sync policy
+  # параметры для автоматического мониторинга и внесения изменений
+  # в Git-репозитория 
   syncPolicy:
+    # каждые 3 минуты Ar—goCD проверяет Git-репозиторий
     automated: # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
       prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
-      selfHeal: true # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
+      # чтобы запретить автоматический деплой, поставьте
+      selfHeal: false # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
     syncOptions:     # Sync options which modifies sync behavior
     - CreateNamespace=true # Namespace Auto-Creation ensures that namespace specified as the application destination exists in the destination cluster.
